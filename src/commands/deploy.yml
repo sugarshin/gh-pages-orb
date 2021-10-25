@@ -1,0 +1,80 @@
+description: >
+  Deploy assets to GitHub Pages
+parameters:
+  git-host:
+    description: Git remote host utl. default github.com
+    type: string
+    default: github.com
+  setup-git:
+    description: Setting Git username and email
+    type: boolean
+    default: true
+  git-user:
+    description: >
+      Git username.
+      Default is "${CIRCLE_USERNAME}"
+    type: string
+    default: ""
+  git-email:
+    description: >
+      Git email.
+      Default is "${CIRCLE_USERNAME}@users.noreply.github.com"
+    type: string
+    default: ""
+  username-variable:
+    description: Project username variable. default CIRCLE_PROJECT_USERNAME
+    type: string
+    default: CIRCLE_PROJECT_USERNAME
+  reponame-variable:
+    description: Project reponame variable. default CIRCLE_PROJECT_REPONAME
+    type: string
+    default: CIRCLE_PROJECT_REPONAME
+  ssh-fingerprints:
+    type: string
+    default: ""
+    description: >
+      Fingerprints for SSH deploy key (add the public key as a read/write
+      key on GitHub; add the private key in CircleCI via SSH Permissions,
+      with github.com as Hostname). Used to push a git tag back to the
+      project's repository.
+  commit-message:
+    description: Commit message. default "Built artifacts of ${commit_hash} [ci skip]"
+    type: string
+    default: ""
+  build-dir:
+    description: Target directory
+    type: string
+    default: dist
+  tmp-dir:
+    description: A directory created temporarily for deployment
+    type: string
+    default: .deploy
+  branch:
+    description: Source branch
+    type: string
+    default: gh-pages
+
+steps:
+  - when:
+      condition: << parameters.setup-git >>
+      steps:
+        - orb-tools/configure-git:
+            user-email: << parameters.git-email >>
+            user-name: << parameters.git-user >>
+  - when:
+      condition: << parameters.ssh-fingerprints >>
+      steps:
+        - add_ssh_keys:
+            fingerprints:
+              - << parameters.ssh-fingerprints >>
+  - run:
+      name: Deploy to GitHub Pages
+      command: <<include(scripts/deploy.sh)>>
+      environment:
+        GIT_HOST: << parameters.git-host >>
+        USERNAME: "$<< parameters.username-variable >>"
+        REPONAME: "$<< parameters.reponame-variable >>"
+        COMMIT_MESSAGE: << parameters.commit-message >>
+        DIST_DIR: << parameters.build-dir >>
+        TMP_DIR: << parameters.tmp-dir >>
+        BRANCH: << parameters.branch >>

@@ -1,0 +1,22 @@
+description: >
+  Example for deploy using command
+usage:
+  version: 2.1
+
+  orbs:
+    gh-pages: sugarshin/gh-pages@x.y.z
+
+  jobs:
+    build_deploy:
+      executor: gh-pages/default
+      steps:
+        - checkout
+        - run: ./build.sh
+        - gh-pages/deploy:
+            ssh-fingerprints: <fingerprint>
+            setup-git: true
+
+  workflows:
+    'Build and Deploy':
+      jobs:
+        - build_deploy
