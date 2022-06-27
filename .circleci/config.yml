@@ -20,6 +20,21 @@ parameters:
     default: "dev:alpha"
 
 jobs:
+  lint-scripts:
+    docker:
+      - image: cimg/base:stable-20.04
+    steps:
+      - checkout
+      - run:
+          name: Install shfmt
+          command: |
+            curl -SsL "https://github.com/mvdan/sh/releases/download/${SHFMT_VERSION}/shfmt_${SHFMT_VERSION}_linux_amd64" -o ./shfmt
+            chmod +x ./shfmt
+          environment:
+            SHFMT_VERSION: v3.5.1
+      - run:
+          name: Lint Shell script
+          command: ./shfmt -d -i 4 src/scripts/
   integration-test:
     executor:
       name: gh-pages/default
@@ -43,6 +58,7 @@ workflows:
     jobs:
       - orb-tools/lint
       - orb-tools/pack
+      - lint-scripts
       - shellcheck/check:
           dir: ./src/scripts
           exclude: SC2148
@@ -55,6 +71,7 @@ workflows:
             - orb-tools/lint
             - orb-tools/pack
             - bats/run
+            - lint-scripts
             - shellcheck/check
       - orb-tools/trigger-integration-tests-workflow:
           name: trigger-integration-dev

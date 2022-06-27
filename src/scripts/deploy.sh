@@ -2,12 +2,11 @@ Setup() {
     U=$(eval echo "$USERNAME")
     R=$(eval echo "$REPONAME")
     GIT_URL="git@${GIT_HOST}:${U}/${R}.git"
-	if [[ -d ./.git ]]
-	then
-		MESSAGE="Built artifacts of $(git rev-parse --short HEAD) [ci skip]"
-	else
-		MESSAGE="Built artifacts of latest commit [ci skip]"
-	fi
+    if [[ -d ./.git ]]; then
+        MESSAGE="Built artifacts of $(git rev-parse --short HEAD) [ci skip]"
+    else
+        MESSAGE="Built artifacts of latest commit [ci skip]"
+    fi
 }
 
 SetCommitMessage() {
